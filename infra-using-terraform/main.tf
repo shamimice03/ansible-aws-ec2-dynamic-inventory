@@ -72,6 +72,7 @@ resource "aws_instance" "amz_linux2_host" {
 
   tags = {
     "Name" = "${local.amz_host}-${count.index + 1}"
+    "OS" = local.amz_host
   }
   
  }
@@ -85,6 +86,7 @@ resource "aws_instance" "amz_linux2_host" {
 
   tags = {
     "Name" = "${local.ubuntu_host}-${count.index + 1}"
+    "OS" = local.ubuntu_host
   }
   
  }

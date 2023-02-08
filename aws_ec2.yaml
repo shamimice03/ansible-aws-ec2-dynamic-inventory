@@ -1,3 +1,9 @@
 plugin: aws_ec2
-regions:
-  - ap-northeast-1
+aws_profile: default
+
+hostnames:
+  - ip-address
+
+groups:
+  amazon_linux2: "'amazon-linux' in tags.OS"
+  ubuntu: "'ubuntu-linux' in tags.OS"
