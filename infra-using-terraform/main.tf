@@ -55,7 +55,7 @@ resource "aws_security_group" "public_sg" {
   }
 }
 
-
+# hello
 # key_pair create
 resource "aws_key_pair" "aws_ec2_access_key" {
   key_name   = "aws-ec2-access"
