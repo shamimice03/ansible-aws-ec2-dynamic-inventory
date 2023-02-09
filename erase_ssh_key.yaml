@@ -1,0 +1,7 @@
+- hosts: amazon_linux2
+  tasks:
+  - name: erase keys
+    authorized_key:
+      user: ec2-user
+      state: absent
+      key: "{{ lookup('file', '~/.ssh/aws-ec2-access.pub') }}"

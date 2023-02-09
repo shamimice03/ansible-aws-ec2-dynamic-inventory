@@ -1,8 +1,8 @@
 locals {
   project_name = var.project_name
-  amz_host = "amazon-linux"
-  ubuntu_host = "ubuntu-linux"
-  
+  amz_host     = "amazon-linux"
+  ubuntu_host  = "ubuntu-linux"
+
   sg_ports = [
     {
       "port" : 22,
@@ -22,6 +22,8 @@ locals {
     }
   ]
 }
+
+
 
 # security group create
 resource "aws_security_group" "public_sg" {
@@ -55,11 +57,31 @@ resource "aws_security_group" "public_sg" {
   }
 }
 
-# hello
+resource "null_resource" "clean_up" {
+  provisioner "local-exec" {
+    command = "/bin/bash clean-up.sh"
+  }
+}
+
+
+resource "null_resource" "generate_key" {
+  provisioner "local-exec" {
+    command = "/bin/bash generate-key.sh"
+  }
+
+  depends_on = [
+    null_resource.clean_up
+  ]
+}
+
 # key_pair create
 resource "aws_key_pair" "aws_ec2_access_key" {
   key_name   = "aws-ec2-access"
   public_key = file("~/.ssh/aws-ec2-access.pub")
+
+  depends_on = [
+    null_resource.generate_key
+  ]
 }
 
 # instance create
@@ -72,12 +94,24 @@ resource "aws_instance" "amz_linux2_host" {
 
   tags = {
     "Name" = "${local.amz_host}-${count.index + 1}"
-    "OS" = local.amz_host
+    "OS"   = local.amz_host
   }
-  
- }
- 
- resource "aws_instance" "amz_ubuntu_host" {
+
+  provisioner "local-exec" {
+    command = templatefile("${path.module}/static-inventory.tpl", {
+      username = "ec2-user"
+      hostname = self.public_ip
+    })
+    # optional
+    interpreter = [
+      "bash",
+      "-c"
+    ]
+  }
+
+}
+
+resource "aws_instance" "amz_ubuntu_host" {
   count                  = 2
   ami                    = data.aws_ami.ubuntu_ami.id
   instance_type          = var.instance_type
@@ -86,7 +120,19 @@ resource "aws_instance" "amz_linux2_host" {
 
   tags = {
     "Name" = "${local.ubuntu_host}-${count.index + 1}"
-    "OS" = local.ubuntu_host
+    "OS"   = local.ubuntu_host
   }
-  
- }
+
+  provisioner "local-exec" {
+    command = templatefile("${path.module}/static-inventory.tpl", {
+      username = "ubuntu"
+      hostname = self.public_ip
+    })
+    # optional
+    interpreter = [
+      "bash",
+      "-c"
+    ]
+  }
+
+}

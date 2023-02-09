@@ -1,3 +1,49 @@
 ansible_ssh_private_key_file: ~/.ssh/aws-ec2-access
 ansible_ssh_user: ubuntu
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+# Install following utilities:
+
+# ```
+# sudo yum install python3 -y
+# sudo yum -y install python-pip
+# sudo pip install boto3
+# ```
+# Create new directory
+# ```
+# mkdir ansible-aws-ec2-dynamic-inventory
+# cd /ansible-aws-ec2-dynamic-inventory
+# ```
+
+# Create new inventory file named "aws_ec2.yaml"
+
+# Copy followig configuration:
+# ```
+# plugin: aws_ec2
+# aws_profile: default
+# regions:
+#   - ap-northeast-1
+# ```
+
+# Run followig command:
+# `ansible-inventory -i aws_ec2.yaml --list`
+
+# You should get output something like this(if you have any running ec2-instance on the corresponding aws az)
+# ### result
+# ```
+#   ....
+#     }, 
+#     "all": {
+#         "children": [
+#             "aws_ec2", 
+#             "ungrouped"
+#         ]
+#     }, 
+#     "aws_ec2": {
+#         "hosts": [
+#             "ec2-18-183-254-106.ap-northeast-1.compute.amazonaws.com", 
+#             "ec2-54-250-163-242.ap-northeast-1.compute.amazonaws.com"
+#         ]
+#     }
+# }
+# ```
