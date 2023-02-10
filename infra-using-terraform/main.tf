@@ -97,18 +97,6 @@ resource "aws_instance" "amz_linux2_host" {
     "OS"   = local.amz_host
   }
 
-  provisioner "local-exec" {
-    command = templatefile("${path.module}/static-inventory.tpl", {
-      username = "ec2-user"
-      hostname = self.public_ip
-    })
-    # optional
-    interpreter = [
-      "bash",
-      "-c"
-    ]
-  }
-
 }
 
 resource "aws_instance" "amz_ubuntu_host" {
@@ -122,17 +110,24 @@ resource "aws_instance" "amz_ubuntu_host" {
     "Name" = "${local.ubuntu_host}-${count.index + 1}"
     "OS"   = local.ubuntu_host
   }
+}
 
+resource "null_resource" "generate_static_inventory" {
   provisioner "local-exec" {
-    command = templatefile("${path.module}/static-inventory.tpl", {
-      username = "ubuntu"
-      hostname = self.public_ip
+    command = templatefile("${path.module}/static-inventory-template.tpl", {
+      amazon = aws_instance.amz_linux2_host[*].public_ip
+      ubuntu = aws_instance.amz_ubuntu_host[*].public_ip
     })
-    # optional
-    interpreter = [
-      "bash",
-      "-c"
-    ]
   }
 
+  depends_on = [
+    aws_instance.amz_linux2_host, 
+    aws_instance.amz_ubuntu_host,
+  ]
 }
+
+
+
+
+
+
